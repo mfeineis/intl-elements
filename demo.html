@@ -1,0 +1,39 @@
+<!DOCTYPE>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>IntlElements Demo Page</title>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/2.0.2/webcomponents-bundle.js"></script>
+    <script type="application/json" data-intl-locale="es-ES">
+        {
+            "some.otherKey": "Que rico!"
+        }
+    </script>
+    <script src="./dist/intl-elements.js"></script>
+    <script>
+
+     IntlElements({
+         defaultLocale: "en-US",
+         defaultMessages: {
+             "some.otherKey": "Great!",
+         },
+         //locale: "es-ES",
+         provide: {
+             //Intl: () => Promise.resolve(window.Intl),
+             //requestTranslation: locale => Promise.resolve(
+             //    JSON.parse(
+             //        document.querySelector(`[data-intl-locale]=${locale}`).innerText
+             //    )
+             //),
+             //formatDate: date => date.toISOString(),
+             //formatNumber: number => String(number),
+         },
+     });
+
+    </script>
+
+    <intl-span intl='{ "key": "some.otherKey" }'></intl-span>
+</body>
+</html>
