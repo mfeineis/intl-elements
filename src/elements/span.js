@@ -1,8 +1,5 @@
-import { IntlElements } from "../core";
 
 export const extractConfig = (it, intl) => JSON.parse(it.getAttribute("intl"));
-
-const trace = (...args) => console.log("trace", ...args);
 
 export const render = (it, intl) => {
     try {
@@ -19,12 +16,12 @@ export const render = (it, intl) => {
         // FIXME: Maybe use something different than `innerHTML` for rendering
         it.innerHTML = translation || cfg.key;
     } catch (e) {
-        trace("render error", e);
+        console.error("render error", e);
         throw e;
     }
 };
 
-export class IntlSpan extends HTMLElement {
+export const configureSpan = IntlElements => class IntlSpan extends HTMLElement {
     static get observedAttributes() {
         return ["intl"];
     }
@@ -60,9 +57,10 @@ export class IntlSpan extends HTMLElement {
         this._dispose = null;
         this._fingerprint = null;
     }
-}
+};
 
-export const define = customElements => (
-    customElements.define("intl-span", IntlSpan)
-);
+export const define = (intl, customElements) => {
+    const IntlSpan = configureSpan(intl);
+    customElements.define("intl-span", IntlSpan);
+};
 

@@ -109,7 +109,7 @@ export const sanitizeLocale = (support, defaultLocale, locale) => pipe(
     defaultTo(DEFAULT_LOCALE),
 )(locale);
 
-export const IntlElements = unsafeConfig => {
+export const configureIntlElements = document => unsafeConfig => {
     const config = validateConfig(unsafeConfig);
     const defaultLocale = config.defaultLocale || DEFAULT_LOCALE;
 
