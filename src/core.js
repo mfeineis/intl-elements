@@ -24,7 +24,10 @@ export const extractLanguage = pipe(
 export const DEFAULT_LANG = extractLanguage(DEFAULT_LOCALE);
 
 // FIXME: Acutally validate configuration
-export const validateConfig = config => config;
+export const validateConfig = (config, setDocumentLang) => {
+    config.setDocumentLang = setDocumentLang;
+    return config;
+};
 
 // FIXME: Actually patch messages
 export const patchMessages = (defaultMessages, messages) => messages;
@@ -74,6 +77,7 @@ export const switchTranslation = (api, config, state, desiredLocale) => (
     ).then(response => {
         const { fromCache, locale, messages } = response;
         console.log(locale, "->", response);
+
         const patched = patchMessages(
             state.allMessages[state.defaultLocale] || {},
             messages,
@@ -89,6 +93,8 @@ export const switchTranslation = (api, config, state, desiredLocale) => (
         if (isDefaultForLang || !state.allMessages[lang]) {
             state.allMessages[lang] = patched;
         }
+
+        config.setDocumentLang(lang);
 
         state.isReady = true;
         return response;
@@ -109,8 +115,8 @@ export const sanitizeLocale = (support, defaultLocale, locale) => pipe(
     defaultTo(DEFAULT_LOCALE),
 )(locale);
 
-export const configureIntlElements = document => unsafeConfig => {
-    const config = validateConfig(unsafeConfig);
+export const configureIntlElements = setDocumentLang => unsafeConfig => {
+    const config = validateConfig(unsafeConfig, setDocumentLang);
     const defaultLocale = config.defaultLocale || DEFAULT_LOCALE;
 
     const state = {

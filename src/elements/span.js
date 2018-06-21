@@ -9,8 +9,9 @@ export const render = (it, intl) => {
         // FIXME: Find a nicer way to mark missing translations
         if (translation && it.hasAttribute("data-intl-missing-translation")) {
             it.removeAttribute("data-intl-missing-translation");
-        } else {
-            it.setAttribute("data-intl-missing-translation", "");
+        }
+        if (!translation && !it.hasAttribute("data-intl-missing-translation")) {
+            it.setAttribute("data-intl-missing-translation", "true");
         }
 
         // FIXME: Maybe use something different than `innerHTML` for rendering
