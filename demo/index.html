@@ -3,15 +3,13 @@
 <head>
     <meta charset="utf-8">
     <title>IntlElements Demo Page</title>
-</head>
-<body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/2.0.2/webcomponents-bundle.js"></script>
+    <x-script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/2.0.2/webcomponents-bundle.js"></x-script>
     <script type="application/json" data-intl-locale="es-ES">
         {
             "some.otherKey": "Que rico!"
         }
     </script>
-    <script src="./dist/intl-elements.js"></script>
+    <script src="../dist/intl-elements.js"></script>
     <script>
 
      // FIXME: Change <html lang> on language change
@@ -22,9 +20,12 @@
              "some.otherKey": "Great!",
          },
          requestTranslation: locale => Promise.resolve(
-             JSON.parse(
-                 document.querySelector(`[data-intl-locale="${locale}"]`).innerText
-             )
+             {
+                 "some.otherKey": "Que rico!"
+             }
+             //JSON.parse(
+             //    document.querySelector(`[data-intl-locale="${locale}"]`).innerText
+             //)
          ),
          supportedLocales: {
              "en": "en-US",
@@ -47,7 +48,8 @@
      IntlElements.ready(api => console.log("> IntlElements.ready"));
 
     </script>
-
+</head>
+<body>
     <intl-span intl='{ "key": "some.otherKey" }'></intl-span>
 
     <script>
@@ -61,6 +63,14 @@
          });
      }, 1000);
 
+    </script>
+    <script src="./dist/app.js"></script>
+    <script>
+     const app = Elm.Main.fullscreen({
+     });
+     //app.ports.changeLocale.subscribe(value => {
+     //    IntlElements.changeLocale(value);
+     //});
     </script>
 </body>
 </html>
