@@ -14,6 +14,8 @@
     <script src="./dist/intl-elements.js"></script>
     <script>
 
+     // FIXME: Change <html lang> on language change
+
      IntlElements({
          defaultLocale: "en-US",
          defaultMessages: {
@@ -24,6 +26,12 @@
                  document.querySelector(`[data-intl-locale="${locale}"]`).innerText
              )
          ),
+         supportedLocales: {
+             "en": "en-US",
+             "en-US": "en-US",
+             "es": "es-ES",
+             "es-ES": "es-ES",
+         },
          //locale: "es-ES",
          provide: {
              //Intl: () => Promise.resolve(window.Intl),
@@ -36,10 +44,23 @@
              //formatNumber: number => String(number),
          },
      });
-     IntlElements.ready(api => console.log("IntlElements.ready", api));
+     IntlElements.ready(api => console.log("> IntlElements.ready"));
 
     </script>
 
     <intl-span intl='{ "key": "some.otherKey" }'></intl-span>
+
+    <script>
+
+     setTimeout(() => {
+        console.log("Changing locale to 'es-AR'...");
+         IntlElements.changeLocale("es-AR").then(actualLocale => {
+             console.info(`> Locale changed to ${actualLocale}`);
+         }).catch(error => {
+             console.error("> Changing locale failed.", error);
+         });
+     }, 1000);
+
+    </script>
 </body>
 </html>

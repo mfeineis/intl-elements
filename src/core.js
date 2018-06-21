@@ -4,6 +4,7 @@ import memoizeFormatConstructor from "intl-format-cache";
 import {
     defaultTo,
     forEach,
+    has,
     head,
     pipe,
     split,
@@ -28,7 +29,9 @@ export const validateConfig = config => config;
 // FIXME: Actually patch messages
 export const patchMessages = (defaultMessages, messages) => messages;
 
-export const requestTranslation = (request, state, locale) => {
+export const requestTranslation = (request, support, state, desiredLocale) => {
+    const locale = support[desiredLocale];
+
     if (state.allMessages[locale]) {
         return Promise.resolve({
             fromCache: true,
@@ -62,25 +65,49 @@ export const notifyReady = (api, subscriptions) => {
     return [];
 };
 
-const switchTranslation = (api, config, state, locale) => (
-    requestTranslation(config.requestTranslation, state, locale)
-        .then(response => {
-            const { fromCache, messages } = response;
-            console.log(locale, "->", response);
-            state.locale = locale;
-            state.messages = patchMessages(
-                state.allMessages[state.defaultLocale],
-                messages,
-            );
-            state.isReady = true;
+export const switchTranslation = (api, config, state, desiredLocale) => (
+    requestTranslation(
+        config.requestTranslation,
+        config.supportedLocales,
+        state,
+        desiredLocale
+    ).then(response => {
+        const { fromCache, locale, messages } = response;
+        console.log(locale, "->", response);
+        const patched = patchMessages(
+            state.allMessages[state.defaultLocale] || {},
+            messages,
+        );
+
+        state.locale = locale;
+        state.messages = patched;
+        state.allMessages[locale] = patched;
+
+        const lang = extractLanguage(locale);
+        const isDefaultForLang = config.supportedLocales[lang] === locale;
+
+        if (isDefaultForLang || !state.allMessages[lang]) {
+            state.allMessages[lang] = patched;
+        }
+
+        state.isReady = true;
+        return response;
+    }).then(response => {
+            notifySubscribers(api, state.subscriptions);
             return response;
         })
-        .then(() => notifySubscribers(api, state.subscriptions))
-        .then(() => (
-            state.readySubscriptions = notifyReady(api, state.readySubscriptions)
-        ))
+        .then(({ locale }) => {
+            state.readySubscriptions = notifyReady(api, state.readySubscriptions);
+            return locale;
+        })
         .catch(error => handleRequestError(error))
 );
+
+export const sanitizeLocale = (support, defaultLocale, locale) => pipe(
+    it => has(it, support) ? it : extractLanguage(it),
+    it => has(it, support) ? support[it] : support[defaultLocale],
+    defaultTo(DEFAULT_LOCALE),
+)(locale);
 
 export const IntlElements = unsafeConfig => {
     const config = validateConfig(unsafeConfig);
@@ -88,7 +115,8 @@ export const IntlElements = unsafeConfig => {
 
     const state = {
         allMessages: {
-            [defaultLocale]: config.defaultMessages || {},
+            [extractLanguage(defaultLocale)]: config.defaultMessages,
+            [defaultLocale]: config.defaultMessages,
         },
         defaultLocale,
         isReady: false,
@@ -99,7 +127,17 @@ export const IntlElements = unsafeConfig => {
     };
 
     const api = Object.assign(IntlElements, {
-        //changeLocale: newLocale => switchTranslation(api, config, state, newLocale),
+        // FIXME: Remove internals in production
+        __config__: config,
+        __state__: state,
+        changeLocale: unsafeLocale => {
+            const newLocale = sanitizeLocale(
+                config.supportedLocales,
+                defaultLocale,
+                unsafeLocale,
+            );
+            return switchTranslation(api, config, state, newLocale);
+        },
         format: (key, values) => {
             // FIXME: Validate message is really there
             const message = state.messages[key];
@@ -131,3 +169,4 @@ export const IntlElements = unsafeConfig => {
 
     return api;
 };
+
