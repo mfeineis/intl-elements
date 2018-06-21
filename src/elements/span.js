@@ -1,41 +1,68 @@
 import { IntlElements } from "../core";
 
+export const extractConfig = (it, intl) => JSON.parse(it.getAttribute("intl"));
+
+const trace = (...args) => console.log("trace", ...args);
+
 export const render = (it, intl) => {
-    const cfg = JSON.parse(it.getAttribute('intl'));
-    const translation = intl.format(cfg.key, cfg.values);
+    try {
+        const cfg = extractConfig(it, intl);
+        const translation = intl.format(cfg.key, cfg.values);
 
-    if (translation && it.hasAttribute('data-intl-missing-translation')) {
-        it.removeAttribute('data-intl-missing-translation');
-    } else {
-        it.setAttribute('data-intl-missing-translation', '');
+        // FIXME: Find a nicer way to mark missing translations
+        if (translation && it.hasAttribute("data-intl-missing-translation")) {
+            it.removeAttribute("data-intl-missing-translation");
+        } else {
+            it.setAttribute("data-intl-missing-translation", "");
+        }
+
+        // FIXME: Maybe use something different than `innerHTML` for rendering
+        it.innerHTML = translation || cfg.key;
+    } catch (e) {
+        trace("render error", e);
+        throw e;
     }
-
-    it.innerHTML = translation || cfg.key;
 };
 
 export class IntlSpan extends HTMLElement {
     static get observedAttributes() {
-        return ['intl'];
+        return ["intl"];
     }
 
     constructor() {
         super();
 
         this._dispose = () => {};
+        this._fingerprint = null;
     }
 
-    attributeChangedCallback(name, oldValue, value) {}
+    attributeChangedCallback(name, oldValue, value) {
+        switch (name) {
+        case "intl":
+            if (this._fingerprint !== value) {
+                this._fingerprint = value;
+                render(this, IntlElements);
+            }
+            return;
+        default:
+            throw new Error(`FATAL: Attribute "${name}" should not be watched!`);
+        }
+    }
 
     connectedCallback() {
-        this._dispose = IntlElements.subscribe(intl => render(this, intl));
-        render(this, IntlElements);
+        this._dispose = IntlElements.subscribe(
+            intl => render(this, intl)
+        );
     }
 
     disconnectedCallback() {
         this._dispose();
+        this._dispose = null;
+        this._fingerprint = null;
     }
 }
 
-export const setup = customElements => (
-    customElements.define('intl-span', IntlSpan)
+export const define = customElements => (
+    customElements.define("intl-span", IntlSpan)
 );
+

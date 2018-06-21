@@ -6,8 +6,9 @@
   "scripts": {
     "build": "rollup --config rollup.config.js",
     "build-exp": "rollup --config rollup.config.js && google-closure-compiler --compilation_level ADVANCED --js dist/intl-elements.debug.js --js_output_file dist/intl-elements.js",
-    "start": "npm run build && http-server -p 8081 .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "http-server -p 8081 .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "rollup --config rollup.config.js --watch"
   },
   "repository": {
     "type": "git",

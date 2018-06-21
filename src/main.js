@@ -1,6 +1,6 @@
 import { IntlElements } from "./core";
-import { setup as setupSpan } from "./elements/span";
+import { define as defineSpan } from "./elements/span";
 
-setupSpan(window.customElements);
+defineSpan(window.customElements);
 
 export default IntlElements;

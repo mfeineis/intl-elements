@@ -19,6 +19,11 @@
          defaultMessages: {
              "some.otherKey": "Great!",
          },
+         requestTranslation: locale => Promise.resolve(
+             JSON.parse(
+                 document.querySelector(`[data-intl-locale="${locale}"]`).innerText
+             )
+         ),
          //locale: "es-ES",
          provide: {
              //Intl: () => Promise.resolve(window.Intl),
@@ -31,6 +36,7 @@
              //formatNumber: number => String(number),
          },
      });
+     IntlElements.ready(api => console.log("IntlElements.ready", api));
 
     </script>
 
