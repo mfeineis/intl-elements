@@ -75,6 +75,12 @@ update msg model =
     ( model, Cmd.none )
 
 
+encodeAttr : List ( String, Value ) -> String
+encodeAttr content =
+    Encode.encode 0
+        (Encode.object content)
+
+
 view : Model -> Browser.Page Msg
 view { route } =
     { title = "Hello World - Elm19"
@@ -85,7 +91,10 @@ view { route } =
                 Html.node "intl-span"
                     [ Attr.attribute
                         "intl"
-                        "{\"key\":\"some.otherKey\"}"
+                        (encodeAttr
+                            [ ( "key", Encode.string "some.otherKey" )
+                            ]
+                        )
                     ]
                     []
                 --Html.text "NotFound"
