@@ -22,7 +22,7 @@ export const render = (it, intl) => {
     }
 };
 
-export const configureSpan = IntlElements => class IntlSpan extends HTMLElement {
+export const configureSpan = (intl, nextTick) => class IntlSpan extends HTMLElement {
     static get observedAttributes() {
         return ["intl"];
     }
@@ -39,7 +39,9 @@ export const configureSpan = IntlElements => class IntlSpan extends HTMLElement 
         case "intl":
             if (this._fingerprint !== value) {
                 this._fingerprint = value;
-                render(this, IntlElements);
+                render(this, intl);
+            } else {
+                console.log("attributeChangedCallback: fingerprint didn't change");
             }
             return;
         default:
@@ -48,9 +50,10 @@ export const configureSpan = IntlElements => class IntlSpan extends HTMLElement 
     }
 
     connectedCallback() {
-        this._dispose = IntlElements.subscribe(
-            intl => render(this, intl)
+        this._dispose = intl.subscribe(
+            () => render(this, intl)
         );
+        nextTick(() => render(this, intl));
     }
 
     disconnectedCallback() {
@@ -60,8 +63,8 @@ export const configureSpan = IntlElements => class IntlSpan extends HTMLElement 
     }
 };
 
-export const define = (intl, customElements) => {
-    const IntlSpan = configureSpan(intl);
-    customElements.define("intl-span", IntlSpan);
+export const define = (intl, registerElement, nextTick) => {
+    const IntlSpan = configureSpan(intl, nextTick);
+    registerElement("intl-span", IntlSpan);
 };
 

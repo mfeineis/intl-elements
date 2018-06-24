@@ -23,13 +23,23 @@ export const extractLanguage = pipe(
 
 export const DEFAULT_LANG = extractLanguage(DEFAULT_LOCALE);
 
-// FIXME: Acutally validate configuration
-export const validateConfig = (config, baseConfig) => {
+export const DEFAULT_SUPPORT = {
+    [DEFAULT_LANG]: DEFAULT_LOCALE,
+    [DEFAULT_LOCALE]: DEFAULT_LOCALE,
+};
+
+export const isThenable = it => it.then && typeof it.then === "function";
+
+export const toThenable = it => isThenable(it) ? it : Promise.resolve(it);
+
+// FIXME: Actually validate configuration
+export const sanitizeConfig = (config, baseConfig) => {
     const {
         includeLangSettings,
         setDocumentLang,
     } = baseConfig;
     config.includeLangSettings = config.includeLangSettings || includeLangSettings;
+    config.supportedLocales = toThenable(config.supportedLocales || DEFAULT_SUPPORT);
     config.setDocumentLang = config.setDocumentLang || setDocumentLang;
     return config;
 };
@@ -37,26 +47,30 @@ export const validateConfig = (config, baseConfig) => {
 // FIXME: Actually patch messages
 export const patchMessages = (defaultMessages, messages) => messages;
 
-export const requestTranslation = (request, support, state, desiredLocale) => {
-    const locale = support[desiredLocale];
+export const requestTranslation = (request, loadSupport, state, desiredLocale) => (
+    loadSupport.then(supportedLocales => {
+        const locale = supportedLocales[desiredLocale];
 
-    if (state.allMessages[locale]) {
-        return Promise.resolve({
-            fromCache: true,
-            locale,
-            messages: state.allMessages[locale],
+        if (state.allMessages[locale]) {
+            return Promise.resolve({
+                fromCache: true,
+                locale,
+                messages: state.allMessages[locale],
+                supportedLocales,
+            });
+        }
+
+        return request(locale).then(messages => {
+            state.allMessages[locale] = messages;
+            return {
+                fromCache: false,
+                locale,
+                messages,
+                supportedLocales,
+            };
         });
-    }
-
-    return request(locale).then(messages => {
-        state.allMessages[locale] = messages;
-        return {
-            fromCache: false,
-            locale,
-            messages,
-        };
-    });
-};
+    })
+);
 
 export const notifySubscribers = (api, subscriptions) => (
     forEach(notify => notify(api), subscriptions)
@@ -75,12 +89,17 @@ export const notifyReady = (api, subscriptions) => {
 
 export const switchTranslation = (api, config, state, desiredLocale) => (
     requestTranslation(
-        config.requestTranslation,
+        config.loadTranslation,
         config.supportedLocales,
         state,
         desiredLocale
     ).then(response => {
-        const { fromCache, locale, messages } = response;
+        const {
+            fromCache,
+            locale,
+            messages,
+            supportedLocales,
+        } = response;
         console.log(locale, "->", response);
 
         const patched = patchMessages(
@@ -93,7 +112,7 @@ export const switchTranslation = (api, config, state, desiredLocale) => (
         state.allMessages[locale] = patched;
 
         const lang = extractLanguage(locale);
-        const isDefaultForLang = config.supportedLocales[lang] === locale;
+        const isDefaultForLang = supportedLocales[lang] === locale;
 
         if (isDefaultForLang || !state.allMessages[lang]) {
             state.allMessages[lang] = patched;
@@ -104,13 +123,14 @@ export const switchTranslation = (api, config, state, desiredLocale) => (
 
         state.isReady = true;
         return response;
-    }).then(response => {
-            notifySubscribers(api, state.subscriptions);
-            return response;
-        })
+    })
         .then(({ locale }) => {
             state.readySubscriptions = notifyReady(api, state.readySubscriptions);
             return locale;
+        })
+        .then(response => {
+            notifySubscribers(api, state.subscriptions);
+            return response;
         })
         .catch(error => handleRequestError(error))
 );
@@ -121,37 +141,20 @@ export const sanitizeLocale = (support, defaultLocale, locale) => pipe(
     defaultTo(DEFAULT_LOCALE),
 )(locale);
 
-export const configureIntlElements = baseConfig => unsafeConfig => {
-    const config = validateConfig(unsafeConfig, baseConfig);
-    const defaultLocale = config.defaultLocale || DEFAULT_LOCALE;
-
-    const state = {
-        allMessages: {
-            [extractLanguage(defaultLocale)]: config.defaultMessages,
-            [defaultLocale]: config.defaultMessages,
-        },
-        defaultLocale,
-        isReady: false,
-        locale: defaultLocale,
-        messages: config.defaultMessages,
-        readySubscriptions: [],
-        subscriptions: [],
-    };
-
-    const api = Object.assign(IntlElements, {
-        // FIXME: Remove internals in production
-        __config__: config,
-        __state__: state,
-        changeLocale: unsafeLocale => {
-            const newLocale = sanitizeLocale(
-                config.supportedLocales,
-                defaultLocale,
-                unsafeLocale,
-            );
-            return switchTranslation(api, config, state, newLocale);
-        },
+export const attachApi = (config, state, api) => (
+    Object.assign(api, {
+        changeLocale: unsafeLocale => (
+            config.supportedLocales.then(supportedLocales => {
+                const newLocale = sanitizeLocale(
+                    supportedLocales,
+                    state.defaultLocale,
+                    unsafeLocale,
+                );
+                return switchTranslation(api, config, state, newLocale);
+            })
+        ),
         format: (key, values, formats) => {
-            // FIXME: Validate message is really there
+            // FIXME: Validate message is really there?
             const message = state.messages[key];
             return new IntlMessageFormat(
                 message,
@@ -159,30 +162,59 @@ export const configureIntlElements = baseConfig => unsafeConfig => {
                 formats,
             ).format(values);
         },
-        ready: unsafeCallback => {
-            const callback = validateSubscription(unsafeCallback);
+        // FIXME: It's probably better to raise a `CustomEvent` when the setup
+        //        for `IntlElements` is complete.
+        //ready: unsafeCallback => {
+        //    const callback = validateSubscription(unsafeCallback);
 
-            if (state.isReady) {
-                callback(api);
-            } else {
-                state.readySubscriptions.push(callback);
-            }
-        },
+        //    if (state.isReady) {
+        //        callback(api);
+        //    } else {
+        //        state.readySubscriptions.push(callback);
+        //    }
+        //},
         subscribe: unsafeOnChange => {
             const onChange = validateSubscription(unsafeOnChange);
 
             state.subscriptions.push(onChange);
 
-            onChange(api);
-
             return () => (
                 state.subscriptions = without(onChange, state.subscriptions)
             );
         },
-    });
+    })
+);
 
-    switchTranslation(api, config, state, config.locale || defaultLocale);
+export const configureCore = baseConfig => {
+    const intl = {
+        setup: unsafeConfig => {
+            const config = sanitizeConfig(unsafeConfig, baseConfig);
+            const defaultLocale = config.defaultLocale || DEFAULT_LOCALE;
 
-    return api;
+            const state = {
+                allMessages: {
+                    [extractLanguage(defaultLocale)]: config.defaultMessages,
+                    [defaultLocale]: config.defaultMessages,
+                },
+                defaultLocale,
+                isReady: false,
+                locale: defaultLocale,
+                messages: config.defaultMessages,
+                readySubscriptions: [],
+                subscriptions: [],
+            };
+
+            const api = attachApi(config, state, intl);
+
+            // FIXME: Remove internals in production
+            api.__config__ = config;
+            api.__state__ = state;
+
+            switchTranslation(api, config, state, config.locale || defaultLocale);
+
+            return intl;
+        },
+    };
+    return intl;
 };
 

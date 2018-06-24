@@ -12,15 +12,20 @@
     <script src="../dist/intl-elements.js"></script>
     <script>
 
-     // FIXME: Change <html lang> on language change
-
-     IntlElements({
+     IntlElements.setup({
          defaultLocale: "en-US",
          defaultMessages: {
              "some.otherKey": "Great! {price, number, USD}",
          },
          //includeLangSettings,
-         requestTranslation: locale => Promise.resolve(
+         supportedLocales: {
+             "en": "en-US",
+             "en-US": "en-US",
+             "es": "es-ES",
+             "es-ES": "es-ES",
+         },
+         //locale: "es-ES",
+         loadTranslation: locale => Promise.resolve(
              {
                  "some.otherKey": "Que rico! {price, number, USD}"
              }
@@ -29,50 +34,22 @@
              //)
          ),
          //setDocumentLang,
-         supportedLocales: {
-             "en": "en-US",
-             "en-US": "en-US",
-             "es": "es-ES",
-             "es-ES": "es-ES",
-         },
-         //locale: "es-ES",
-         provide: {
-             //Intl: () => Promise.resolve(window.Intl),
-             //requestTranslation: locale => Promise.resolve(
-             //    JSON.parse(
-             //        document.querySelector(`[data-intl-locale]=${locale}`).innerText
-             //    )
-             //),
-             //formatDate: date => date.toISOString(),
-             //formatNumber: number => String(number),
-         },
      });
-     IntlElements.ready(api => console.log("> IntlElements.ready"));
 
     </script>
 </head>
 <body>
     <intl-span intl='{ "key": "some.otherKey", "values": { "price": 3.14159 } }'></intl-span>
-
-    <script>
-
-     setTimeout(() => {
-        console.log("Changing locale to 'es-AR'...");
-         IntlElements.changeLocale("es-AR").then(actualLocale => {
-             console.info(`> Locale changed to ${actualLocale}`);
-         }).catch(error => {
-             console.error("> Changing locale failed.", error);
-         });
-     }, 1000);
-
-    </script>
     <script src="./dist/app.js"></script>
     <script>
-     var app = Elm.Main.init({
-     });
-     //app.ports.changeLocale.subscribe(value => {
-     //    IntlElements.changeLocale(value);
-     //});
+
+    var app = Elm.Main.init({
+    });
+
+    //app.ports.changeLocale.subscribe(value => {
+    //    IntlElements.changeLocale(value);
+    //});
+
     </script>
 </body>
 </html>
