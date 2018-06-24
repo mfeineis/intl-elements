@@ -11,7 +11,6 @@ encodeIntl pairs =
     Encode.encode 0 (Encode.object pairs)
 
 
-
 text : String -> Value -> Value -> List (Html.Attribute msg) -> Html msg
 text key formats values attrs =
     Html.node "intl-span"

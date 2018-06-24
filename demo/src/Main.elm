@@ -30,21 +30,21 @@ translated : { ctx | somePrice : Float } -> List (Html.Attribute msg) -> Html ms
 translated { somePrice } =
     Intl.text "some.otherKey"
         (Encode.object
-             [ ( "number"
-               , Encode.object
-                   [ ( "USD"
-                     , Encode.object
-                         [ ( "style", Encode.string "currency" )
-                         , ( "currency", Encode.string "USD" )
-                         ]
-                     )
-                   ]
-               )
-             ]
+            [ ( "number"
+              , Encode.object
+                    [ ( "USD"
+                      , Encode.object
+                            [ ( "style", Encode.string "currency" )
+                            , ( "currency", Encode.string "USD" )
+                            ]
+                      )
+                    ]
+              )
+            ]
         )
         (Encode.object
-             [ ( "price", Encode.float somePrice )
-             ]
+            [ ( "price", Encode.float somePrice )
+            ]
         )
 
 
