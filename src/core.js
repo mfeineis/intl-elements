@@ -1,5 +1,5 @@
-import OriginalIntlMessageFormat from "intl-messageformat";
-import memoizeFormatConstructor from "intl-format-cache";
+import OriginalIntlMessageFormat from "intl-messageformat/src/main";
+import memoizeFormatConstructor from "intl-format-cache/src/memoizer";
 
 import {
     defaultTo,
@@ -190,6 +190,8 @@ export const configureCore = baseConfig => {
         setup: unsafeConfig => {
             const config = sanitizeConfig(unsafeConfig, baseConfig);
             const defaultLocale = config.defaultLocale || DEFAULT_LOCALE;
+
+            OriginalIntlMessageFormat.defaultLocale = defaultLocale;
 
             const state = {
                 allMessages: {

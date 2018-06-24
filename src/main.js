@@ -1,4 +1,4 @@
-import IntlMessageFormat from "intl-messageformat";
+import IntlMessageFormat from "intl-messageformat/src/main";
 
 import { configureCore } from "./core";
 import { define as defineSpan } from "./elements/span";
