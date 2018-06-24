@@ -17,11 +17,11 @@
      IntlElements({
          defaultLocale: "en-US",
          defaultMessages: {
-             "some.otherKey": "Great!",
+             "some.otherKey": "Great! {price, number, USD}",
          },
          requestTranslation: locale => Promise.resolve(
              {
-                 "some.otherKey": "Que rico!"
+                 "some.otherKey": "Que rico! {price, number, USD}"
              }
              //JSON.parse(
              //    document.querySelector(`[data-intl-locale="${locale}"]`).innerText
@@ -50,7 +50,7 @@
     </script>
 </head>
 <body>
-    <intl-span intl='{ "key": "some.otherKey" }'></intl-span>
+    <intl-span intl='{ "key": "some.otherKey", "values": { "price": 3.14159 } }'></intl-span>
 
     <script>
 

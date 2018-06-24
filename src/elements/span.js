@@ -4,7 +4,7 @@ export const extractConfig = (it, intl) => JSON.parse(it.getAttribute("intl"));
 export const render = (it, intl) => {
     try {
         const cfg = extractConfig(it, intl);
-        const translation = intl.format(cfg.key, cfg.values);
+        const translation = intl.format(cfg.key, cfg.values, cfg.formats);
 
         // FIXME: Find a nicer way to mark missing translations
         if (translation && it.hasAttribute("data-intl-missing-translation")) {

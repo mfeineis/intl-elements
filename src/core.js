@@ -144,10 +144,14 @@ export const configureIntlElements = setDocumentLang => unsafeConfig => {
             );
             return switchTranslation(api, config, state, newLocale);
         },
-        format: (key, values) => {
+        format: (key, values, formats) => {
             // FIXME: Validate message is really there
             const message = state.messages[key];
-            return new IntlMessageFormat(message, state.locale).format(values);
+            return new IntlMessageFormat(
+                message,
+                state.locale,
+                formats,
+            ).format(values);
         },
         ready: unsafeCallback => {
             const callback = validateSubscription(unsafeCallback);
