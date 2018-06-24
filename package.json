@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rollup --config rollup.config.js",
     "build-exp": "rollup --config rollup.config.js && google-closure-compiler --compilation_level ADVANCED --js dist/intl-elements.debug.js --js_output_file dist/intl-elements.js",
-    "elm:build": "cd demo && private/elm make elm/Main.elm --output=dist/app.js --optimize && cd ..",
+    "elm:build": "cd demo && private/elm make src/Main.elm --output=dist/app.js && cd ..",
     "start": "npm run build && npm run elm:build && http-server -p 8081 .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "rollup --config rollup.config.js --watch"
