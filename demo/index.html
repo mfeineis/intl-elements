@@ -19,6 +19,7 @@
          defaultMessages: {
              "some.otherKey": "Great! {price, number, USD}",
          },
+         //includeLangSettings,
          requestTranslation: locale => Promise.resolve(
              {
                  "some.otherKey": "Que rico! {price, number, USD}"
@@ -27,6 +28,7 @@
              //    document.querySelector(`[data-intl-locale="${locale}"]`).innerText
              //)
          ),
+         //setDocumentLang,
          supportedLocales: {
              "en": "en-US",
              "en-US": "en-US",

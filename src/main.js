@@ -5,14 +5,19 @@ import { define as defineSpan } from "./elements/span";
 
 const setDocumentLang = lang => {
     document.querySelector("html").setAttribute("lang", lang);
+};
 
+const includeLangSettings = lang => {
     const localeInclude = document.createElement("script");
     localeInclude.setAttribute(`data-intl-locale-include-${lang}`, "");
     localeInclude.src = `https://cdnjs.cloudflare.com/ajax/libs/intl-messageformat/2.2.0/locale-data/${lang}.js`;
     document.querySelector("head").appendChild(localeInclude);
 };
 
-const IntlElements = configureIntlElements(setDocumentLang);
+const IntlElements = configureIntlElements({
+    includeLangSettings,
+    setDocumentLang,
+});
 
 defineSpan(IntlElements, window.customElements);
 
