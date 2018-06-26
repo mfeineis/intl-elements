@@ -48,11 +48,19 @@ translated { somePrice } =
         )
 
 
+someInput : List (Html.Attribute msg) -> Html msg
+someInput =
+    Intl.textInput "some.placeholder"
+        (Encode.object [])
+        (Encode.object [])
+
+
 view : Model -> Browser.Document Msg
 view model =
     { title = "Hello World - Elm19"
     , body =
         [ Html.text "Hello World!"
         , translated model []
+        , someInput []
         ]
     }

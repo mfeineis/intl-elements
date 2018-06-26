@@ -1,4 +1,4 @@
-module Intl exposing (text)
+module Intl exposing (text, textInput)
 
 import Html exposing (Html)
 import Html.Attributes as Attr
@@ -25,3 +25,22 @@ text key formats values attrs =
                ]
         )
         []
+
+
+textInput : String -> Value -> Value -> List (Html.Attribute msg) -> Html msg
+textInput key formats values attrs =
+    Html.node "intl-text-input"
+        (attrs
+           ++ [ Attr.attribute "intl"
+                  (encodeIntl
+                       [ ( "key", Encode.string key )
+                       , ( "values", values )
+                       , ( "formats", formats )
+                       , ( "attribute", Encode.string "placeholder" )
+                       ]
+                  )
+
+             ]
+        )
+        []
+

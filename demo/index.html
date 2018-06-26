@@ -6,7 +6,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/2.0.2/webcomponents-bundle.js"></script>
     <script type="application/json" data-intl-locale="es-ES">
         {
-            "some.otherKey": "Que rico!"
+            "some.otherKey": "Que rico!",
+            "some.placeholder": "No se como se llama esto..."
         }
     </script>
     <script src="../dist/intl-elements.js"></script>
@@ -16,6 +17,7 @@
          defaultLocale: "en-US",
          defaultMessages: {
              "some.otherKey": "Great! {price, number, USD}",
+             "some.placeholder": "Placeholder text...",
          },
          //includeLangSettings,
          supportedLocales: {
@@ -24,10 +26,11 @@
              "es": "es-ES",
              "es-ES": "es-ES",
          },
-         //locale: "es-ES",
+         locale: "es-ES",
          loadTranslation: locale => Promise.resolve(
              {
-                 "some.otherKey": "Que rico! {price, number, USD}"
+                 "some.otherKey": "Que rico! {price, number, USD}",
+                 "some.placeholder": "No se como se llama esto...",
              }
              //JSON.parse(
              //    document.querySelector(`[data-intl-locale="${locale}"]`).innerText

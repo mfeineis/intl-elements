@@ -2,7 +2,11 @@
 export const extractConfig = (it, intl) => JSON.parse(it.getAttribute("intl"));
 
 export const render = (it, intl) => {
-    console.log("<intl-span>.render", it, intl);
+    console.log("<intl-input>.render", it, intl);
+
+    if (!it._node) {
+        return;
+    }
 
     try {
         const cfg = extractConfig(it, intl);
@@ -16,17 +20,37 @@ export const render = (it, intl) => {
             it.setAttribute("data-intl-missing-translation", "true");
         }
 
-        // FIXME: Maybe use something different than `innerHTML` for rendering
-        it.innerHTML = translation || cfg.key;
+        it._node.setAttribute(cfg.attribute || "placeholder", translation || cfg.key);
     } catch (e) {
-        console.error("<intl-span>.render error", e);
+        console.error("<intl-input>.render error", e);
         throw e;
     }
 };
 
 export const configureElement = (intl, nextTick) => class extends HTMLElement {
     static get observedAttributes() {
-        return ["intl"];
+        return [
+            "intl",
+            "accept",
+            "autocomplete",
+            "autofocus",
+            "disabled",
+            "form",
+            "inputmode",
+            "list",
+            "maxlength",
+            "minlength",
+            "name",
+            "pattern",
+            "readonly",
+            "required",
+            "selectionDirection",
+            "size",
+            "spellcheck",
+            "tabindex",
+            "title",
+            "value",
+        ];
     }
 
     constructor() {
@@ -34,6 +58,11 @@ export const configureElement = (intl, nextTick) => class extends HTMLElement {
 
         this._dispose = () => {};
         this._fingerprint = null;
+        this._node = null;
+    }
+
+    addEventListener(topic, callback, options) {
+        this._node && this._node.addEventListener(topic, callback, options);
     }
 
     attributeChangedCallback(name, oldValue, value) {
@@ -47,11 +76,17 @@ export const configureElement = (intl, nextTick) => class extends HTMLElement {
             }
             return;
         default:
-            throw new Error(`FATAL: Attribute "${name}" should not be watched!`);
+            this._node && this._node.setAttribute(name, value);
+            return;
         }
     }
 
     connectedCallback() {
+        this._node = document.createElement("input");
+        this._node.setAttribute("type", "text");
+
+        this.appendChild(this._node);
+
         this._dispose = intl.subscribe(
             () => render(this, intl)
         );
@@ -62,11 +97,16 @@ export const configureElement = (intl, nextTick) => class extends HTMLElement {
         this._dispose();
         this._dispose = null;
         this._fingerprint = null;
+        this._node = null;
+    }
+
+    removeEventListener(topic, callback) {
+        this._node && this._node.removeEventListener(topic, callback);
     }
 };
 
 export const define = (intl, registerElement, nextTick) => {
     const Element = configureElement(intl, nextTick);
-    registerElement("intl-span", Element);
+    registerElement("intl-text-input", Element);
 };
 

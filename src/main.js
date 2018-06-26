@@ -2,6 +2,7 @@ import IntlMessageFormat from "intl-messageformat/src/main";
 
 import { configureCore } from "./core";
 import { define as defineSpan } from "./elements/span";
+import { define as defineTextInput } from "./elements/textInput";
 
 const setDocumentLang = lang => {
     document.querySelector("html").setAttribute("lang", lang);
@@ -26,14 +27,15 @@ const IntlElements = configureCore({
     setDocumentLang,
 });
 
-const registerElement = (tag, Element) => (
-    window.customElements.define(tag, Element)
+const registerElement = (tag, Element, options) => (
+    window.customElements.define(tag, Element, options)
 );
 
 // FIXME: `nextTick` shouldn't be necessary, remove it!
 const nextTick = fn => window.setTimeout(fn, 1);
 
 defineSpan(IntlElements, registerElement, nextTick);
+defineTextInput(IntlElements, registerElement, nextTick);
 
 // We need to expose the constructor for dynamic locale data loading
 window["IntlMessageFormat"] = IntlMessageFormat;
