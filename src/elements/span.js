@@ -1,68 +1,48 @@
+import { configureRenderer } from "../render";
 
-export const extractConfig = (it, intl) => JSON.parse(it.getAttribute("intl"));
+export const configureElement = (intl, nextTick) => {
+    const render = configureRenderer(it => it);
 
-export const render = (it, intl) => {
-    console.log("<intl-span>.render", it, intl);
-
-    try {
-        const cfg = extractConfig(it, intl);
-        const translation = intl.format(cfg.key, cfg.values, cfg.formats);
-
-        // FIXME: Find a nicer way to mark missing translations
-        if (translation && it.hasAttribute("data-intl-missing-translation")) {
-            it.removeAttribute("data-intl-missing-translation");
-        }
-        if (!translation && !it.hasAttribute("data-intl-missing-translation")) {
-            it.setAttribute("data-intl-missing-translation", "true");
+    return class extends HTMLElement {
+        static get observedAttributes() {
+            return ["intl"];
         }
 
-        // FIXME: Maybe use something different than `innerHTML` for rendering
-        it.innerHTML = translation || cfg.key;
-    } catch (e) {
-        console.error("<intl-span>.render error", e);
-        throw e;
-    }
-};
+        constructor() {
+            super();
 
-export const configureElement = (intl, nextTick) => class extends HTMLElement {
-    static get observedAttributes() {
-        return ["intl"];
-    }
+            this._dispose = () => {};
+            this._fingerprint = null;
+        }
 
-    constructor() {
-        super();
-
-        this._dispose = () => {};
-        this._fingerprint = null;
-    }
-
-    attributeChangedCallback(name, oldValue, value) {
-        switch (name) {
-        case "intl":
-            if (this._fingerprint !== value) {
-                this._fingerprint = value;
-                render(this, intl);
-            } else {
-                console.info("attributeChangedCallback: fingerprint didn't change");
+        attributeChangedCallback(name, oldValue, value) {
+            switch (name) {
+            case "intl":
+                if (this._fingerprint !== value) {
+                    this._fingerprint = value;
+                    render(this, intl);
+                } else {
+                    console.info("attributeChangedCallback: fingerprint didn't change");
+                }
+                return;
+            default:
+                throw new Error(`FATAL: Attribute "${name}" should not be watched!`);
             }
-            return;
-        default:
-            throw new Error(`FATAL: Attribute "${name}" should not be watched!`);
         }
-    }
 
-    connectedCallback() {
-        this._dispose = intl.subscribe(
-            () => render(this, intl)
-        );
-        nextTick(() => render(this, intl));
-    }
+        connectedCallback() {
+            this._dispose = intl.subscribe(
+                () => render(this, intl)
+            );
+            nextTick(() => render(this, intl));
+        }
 
-    disconnectedCallback() {
-        this._dispose();
-        this._dispose = null;
-        this._fingerprint = null;
-    }
+        disconnectedCallback() {
+            this._dispose();
+            this._dispose = null;
+            this._fingerprint = null;
+        }
+    };
 };
 
 export const define = (intl, registerElement, nextTick) => {

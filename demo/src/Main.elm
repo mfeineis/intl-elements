@@ -62,5 +62,6 @@ view model =
         [ Html.text "Hello World!"
         , translated model []
         , someInput []
+        , Intl.textInput "some.unknownKey" (Encode.object []) (Encode.object []) []
         ]
     }

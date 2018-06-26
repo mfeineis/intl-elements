@@ -6,9 +6,9 @@ import Json.Decode as Decode exposing (Value)
 import Json.Encode as Encode
 
 
-encodeIntl : List ( String, Value ) -> String
-encodeIntl pairs =
-    Encode.encode 0 (Encode.object pairs)
+encodeIntl : List (List ( String, Value )) -> String
+encodeIntl list =
+    Encode.encode 0 (Encode.list Encode.object list)
 
 
 text : String -> Value -> Value -> List (Html.Attribute msg) -> Html msg
@@ -17,9 +17,10 @@ text key formats values attrs =
         (attrs
             ++ [ Attr.attribute "intl"
                     (encodeIntl
-                        [ ( "key", Encode.string key )
-                        , ( "values", values )
-                        , ( "formats", formats )
+                        [ [ ( "key", Encode.string key )
+                          , ( "values", values )
+                          , ( "formats", formats )
+                          ]
                         ]
                     )
                ]
@@ -33,11 +34,17 @@ textInput key formats values attrs =
         (attrs
            ++ [ Attr.attribute "intl"
                   (encodeIntl
-                       [ ( "key", Encode.string key )
-                       , ( "values", values )
-                       , ( "formats", formats )
-                       , ( "attribute", Encode.string "placeholder" )
-                       ]
+                      [ [ ( "key", Encode.string key )
+                        , ( "values", values )
+                        , ( "formats", formats )
+                        , ( "attribute", Encode.string "placeholder" )
+                        ]
+                      , [ ( "key", Encode.string key )
+                        , ( "values", values )
+                        , ( "formats", formats )
+                        , ( "attribute", Encode.string "title" )
+                        ]
+                      ]
                   )
 
              ]
