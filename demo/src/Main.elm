@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Html exposing (Html)
+import Html.Attributes as Attr
 import Intl
 import Json.Decode as Decode exposing (Value)
 import Json.Encode as Encode
@@ -63,5 +64,8 @@ view model =
         , translated model []
         , someInput []
         , Intl.textInput "some.unknownKey" (Encode.object []) (Encode.object []) []
+        , Intl.textArea "some.placeholder" (Encode.object []) (Encode.object [])
+            [ Attr.value "Some predefined text"
+            ]
         ]
     }

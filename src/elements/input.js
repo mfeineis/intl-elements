@@ -1,32 +1,11 @@
 import { configureRenderer } from "../render";
 
-export const configureElement = (intl, nextTick) => {
+export const configureElement = (intl, nextTick, createNode, attrs) => {
     const render = configureRenderer(it => it._node);
 
     return class extends HTMLElement {
         static get observedAttributes() {
-            return [
-                "intl",
-                "accept",
-                "autocomplete",
-                "autofocus",
-                "disabled",
-                "form",
-                "inputmode",
-                "list",
-                "maxlength",
-                "minlength",
-                "name",
-                "pattern",
-                "readonly",
-                "required",
-                "selectionDirection",
-                "size",
-                "spellcheck",
-                "tabindex",
-                "title",
-                "value",
-            ];
+            return ["intl"].concat(attrs);
         }
 
         constructor() {
@@ -58,9 +37,7 @@ export const configureElement = (intl, nextTick) => {
         }
 
         connectedCallback() {
-            this._node = document.createElement("input");
-            this._node.setAttribute("type", "text");
-
+            this._node = createNode();
             this.appendChild(this._node);
 
             this._dispose = intl.subscribe(
@@ -73,6 +50,7 @@ export const configureElement = (intl, nextTick) => {
             this._dispose();
             this._dispose = null;
             this._fingerprint = null;
+            this.removeChild(this._node);
             this._node = null;
         }
 
@@ -83,7 +61,58 @@ export const configureElement = (intl, nextTick) => {
 };
 
 export const define = (intl, registerElement, nextTick) => {
-    const Element = configureElement(intl, nextTick);
-    registerElement("intl-text-input", Element);
+    registerElement("intl-text-input", configureElement(
+        intl,
+        nextTick,
+        () => {
+            const node = document.createElement("input");
+            node.setAttribute("type", "text");
+            return node;
+        },
+        [
+            "accept",
+            "autocomplete",
+            "autofocus",
+            "disabled",
+            "form",
+            "inputmode",
+            "list",
+            "maxlength",
+            "minlength",
+            "name",
+            "pattern",
+            "readonly",
+            "required",
+            "selectionDirection",
+            "size",
+            "spellcheck",
+            "tabindex",
+            "title",
+            "value",
+        ],
+    ));
+    registerElement("intl-textarea", configureElement(
+        intl,
+        nextTick,
+        () => document.createElement("textarea"),
+        [
+            "autocomplete",
+            "autofocus",
+            "cols",
+            "disabled",
+            "form",
+            "maxlength",
+            "minlength",
+            "name",
+            "readonly",
+            "required",
+            "rows",
+            "spellcheck",
+            "tabindex",
+            "title",
+            "value",
+            "wrap",
+        ],
+    ));
 };
 
