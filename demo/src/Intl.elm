@@ -1,4 +1,4 @@
-module Intl exposing (text, textArea, textInput)
+module Intl exposing (element, withPlaceholder)
 
 import Html exposing (Html)
 import Html.Attributes as Attr
@@ -11,9 +11,9 @@ encodeIntl list =
     Encode.encode 0 (Encode.list Encode.object list)
 
 
-text : String -> Value -> Value -> List (Html.Attribute msg) -> Html msg
-text key formats values attrs =
-    Html.node "intl-span"
+element : String -> Value -> Value -> List (Html.Attribute msg) -> Html msg
+element key formats values attrs =
+    Html.node "intl-element"
         (attrs
             ++ [ Attr.attribute "intl"
                     (encodeIntl
@@ -28,45 +28,19 @@ text key formats values attrs =
         []
 
 
-textArea : String -> Value -> Value -> List (Html.Attribute msg) -> Html msg
-textArea key formats values attrs =
-    Html.node "intl-textarea"
-        (attrs
-           ++ [ Attr.attribute "intl"
-                  (encodeIntl
-                      [ [ ( "key", Encode.string key )
-                        , ( "values", values )
-                        , ( "formats", formats )
-                        , ( "attribute", Encode.string "placeholder" )
-                        ]
-                      ]
-                  )
+withPlaceholder : String -> Value -> Value -> Html msg -> Html msg
+withPlaceholder key formats values child =
+    Html.node "intl-element"
+        [ Attr.attribute "intl"
+            (encodeIntl
+                [ [ ( "key", Encode.string key )
+                  , ( "values", values )
+                  , ( "formats", formats )
+                  , ( "attribute", Encode.string "placeholder" )
+                  ]
+                ]
+            )
 
-             ]
-        )
-        []
-
-
-textInput : String -> Value -> Value -> List (Html.Attribute msg) -> Html msg
-textInput key formats values attrs =
-    Html.node "intl-text-input"
-        (attrs
-           ++ [ Attr.attribute "intl"
-                  (encodeIntl
-                      [ [ ( "key", Encode.string key )
-                        , ( "values", values )
-                        , ( "formats", formats )
-                        , ( "attribute", Encode.string "placeholder" )
-                        ]
-                      , [ ( "key", Encode.string key )
-                        , ( "values", values )
-                        , ( "formats", formats )
-                        , ( "attribute", Encode.string "title" )
-                        ]
-                      ]
-                  )
-
-             ]
-        )
-        []
+        ]
+        [ child ]
 

@@ -29,7 +29,7 @@ type Msg
 
 translated : { ctx | somePrice : Float } -> List (Html.Attribute msg) -> Html msg
 translated { somePrice } =
-    Intl.text "some.otherKey"
+    Intl.element "some.otherKey"
         (Encode.object
             [ ( "number"
               , Encode.object
@@ -50,10 +50,11 @@ translated { somePrice } =
 
 
 someInput : List (Html.Attribute msg) -> Html msg
-someInput =
-    Intl.textInput "some.placeholder"
+someInput attrs =
+    Intl.withPlaceholder "some.placeholder"
         (Encode.object [])
         (Encode.object [])
+        (Html.input attrs [])
 
 
 view : Model -> Browser.Document Msg
@@ -63,9 +64,8 @@ view model =
         [ Html.text "Hello World!"
         , translated model []
         , someInput []
-        , Intl.textInput "some.unknownKey" (Encode.object []) (Encode.object []) []
-        , Intl.textArea "some.placeholder" (Encode.object []) (Encode.object [])
-            [ Attr.value "Some predefined text"
-            ]
+        , Intl.withPlaceholder "some.unknownKey" (Encode.object []) (Encode.object []) (Html.input [] [])
+        , Intl.withPlaceholder "some.placeholder" (Encode.object []) (Encode.object [])
+            (Html.textarea [] [])
         ]
     }

@@ -42,7 +42,13 @@
     </script>
 </head>
 <body>
-    <intl-span intl='{ "key": "some.otherKey", "values": { "price": 3.14159 } }'></intl-span>
+    <intl-element intl='{ "select": "input.other-class", "key": "some.otherKey", "values": { "price": 3.14159 }, "attribute": "placeholder" }'>
+        <input class="some-class" type="text" placeholder="omg" />
+        <input class="other-class" type="text" />
+        <input class="other-class" type="text" />
+    </intl-element>
+
+    <intl-element intl='{ "key": "some.otherKey", "values": { "price": 3.14159 } }'></intl-element>
     <script src="./dist/app.js"></script>
     <script>
 
