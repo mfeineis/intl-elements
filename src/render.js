@@ -9,6 +9,25 @@ export const extractConfig = (it, intl) => {
     return [json];
 };
 
+export const findContext = it => {
+    let node = it;
+    while (node.parentNode) {
+        node = node.parentNode;
+
+        if (node.tagName.toLowerCase() === "intl-context") {
+            return node;
+        }
+    }
+
+    console.warn(`No parent <intl-context> found`);
+    return null;
+};
+
+export const findIntl = it => {
+    const node = findContext(it);
+    return node && node._intl;
+};
+
 const slice = Array.prototype.slice;
 
 export const selectCandidate = (it, selector) => {
@@ -31,7 +50,13 @@ export const selectCandidate = (it, selector) => {
     return [it];
 };
 
-export const render = (it, intl) => {
+export const render = it => {
+    const intl = findIntl(it);
+
+    if (!intl) {
+        return;
+    }
+
     console.log("render", it, intl);
 
     try {

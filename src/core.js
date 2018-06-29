@@ -141,8 +141,8 @@ export const sanitizeLocale = (support, defaultLocale, locale) => pipe(
     defaultTo(DEFAULT_LOCALE),
 )(locale);
 
-export const attachApi = (config, state, api) => (
-    Object.assign(api, {
+export const configureApi = (config, state) => {
+    const api = {
         changeLocale: unsafeLocale => (
             config.supportedLocales.then(supportedLocales => {
                 const newLocale = sanitizeLocale(
@@ -153,6 +153,10 @@ export const attachApi = (config, state, api) => (
                 return switchTranslation(api, config, state, newLocale);
             })
         ),
+        dispose: () => {
+            state.subscriptions = [];
+            state.readySubscriptions = [];
+        },
         format: (key, values, formats) => {
             // FIXME: Validate message is really there?
             const message = state.messages[key];
@@ -182,41 +186,36 @@ export const attachApi = (config, state, api) => (
                 state.subscriptions = without(onChange, state.subscriptions)
             );
         },
-    })
-);
-
-export const configureCore = baseConfig => {
-    const intl = {
-        setup: unsafeConfig => {
-            const config = sanitizeConfig(unsafeConfig, baseConfig);
-            const defaultLocale = config.defaultLocale || DEFAULT_LOCALE;
-
-            OriginalIntlMessageFormat.defaultLocale = defaultLocale;
-
-            const state = {
-                allMessages: {
-                    [extractLanguage(defaultLocale)]: config.defaultMessages,
-                    [defaultLocale]: config.defaultMessages,
-                },
-                defaultLocale,
-                isReady: false,
-                locale: defaultLocale,
-                messages: config.defaultMessages,
-                readySubscriptions: [],
-                subscriptions: [],
-            };
-
-            const api = attachApi(config, state, intl);
-
-            // FIXME: Remove internals in production
-            api.__config__ = config;
-            api.__state__ = state;
-
-            switchTranslation(api, config, state, config.locale || defaultLocale);
-
-            return intl;
-        },
     };
-    return intl;
+
+    return api;
+};
+
+export const configureCore = baseConfig => unsafeConfig => {
+    const config = sanitizeConfig(unsafeConfig, baseConfig);
+    const defaultLocale = config.defaultLocale || DEFAULT_LOCALE;
+
+    const state = {
+        allMessages: {
+            [extractLanguage(defaultLocale)]: config.defaultMessages,
+            [defaultLocale]: config.defaultMessages,
+        },
+        defaultLocale,
+        isReady: false,
+        locale: defaultLocale,
+        messages: config.defaultMessages,
+        readySubscriptions: [],
+        subscriptions: [],
+    };
+
+    const api = configureApi(config, state);
+
+    // FIXME: Remove internals in production
+    api.__config__ = config;
+    api.__state__ = state;
+
+    switchTranslation(api, config, state, config.locale || defaultLocale);
+
+    return api;
 };
 

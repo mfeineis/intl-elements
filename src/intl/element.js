@@ -1,4 +1,4 @@
-import { render } from "../render";
+import { findIntl, render } from "../render";
 
 const observerConfig = {
     attributes: true,
@@ -6,7 +6,7 @@ const observerConfig = {
     subtree: true,
 };
 
-export const configureElement = (intl, nextTick) => class extends HTMLElement {
+export const configureElement = nextTick => class extends HTMLElement {
     static get observedAttributes() {
         return ["intl"];
     }
@@ -14,6 +14,7 @@ export const configureElement = (intl, nextTick) => class extends HTMLElement {
     constructor() {
         super();
 
+        this._isConnected = false;
         this._observer = null;
         this._dispose = () => {};
         this._fingerprint = null;
@@ -24,7 +25,10 @@ export const configureElement = (intl, nextTick) => class extends HTMLElement {
         case "intl":
             if (this._fingerprint !== value) {
                 this._fingerprint = value;
-                render(this, intl);
+
+                if (this._isConnected) {
+                    render(this);
+                }
             } else {
                 console.info("attributeChangedCallback: fingerprint didn't change");
             }
@@ -37,6 +41,8 @@ export const configureElement = (intl, nextTick) => class extends HTMLElement {
     connectedCallback() {
         console.log("<intl-element>.connectedCallback", this.children);
 
+        const intl = findIntl(this);
+
         // FIXME: Maybe having the `MutationObserver` is overkill?
         this._observer = new MutationObserver(list => {
             //console.log("> mutations on ", this, ":", list);
@@ -45,19 +51,22 @@ export const configureElement = (intl, nextTick) => class extends HTMLElement {
             this._observer.disconnect();
 
             nextTick(() => {
-                render(this, intl);
+                render(this);
                 this._observer.observe(this, observerConfig);
             });
         });
         this._observer.observe(this, observerConfig);
 
         this._dispose = intl.subscribe(
-            () => render(this, intl)
+            () => render(this)
         );
-        nextTick(() => render(this, intl));
+        nextTick(() => render(this));
+
+        this._isConnected = true;
     }
 
     disconnectedCallback() {
+        this._isConnected = false;
         this._observer.disconnect();
         this._observer = null;
         this._dispose();
@@ -66,8 +75,7 @@ export const configureElement = (intl, nextTick) => class extends HTMLElement {
     }
 };
 
-export const define = (intl, registerElement, nextTick) => {
-    const Element = configureElement(intl, nextTick);
-    registerElement("intl-element", Element);
+export const define = (registerElement, nextTick) => {
+    registerElement("intl-element", configureElement(nextTick));
 };
 

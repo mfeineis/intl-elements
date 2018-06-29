@@ -11,49 +11,31 @@
         }
     </script>
     <script src="../dist/intl-elements.js"></script>
-    <script>
-
-     IntlElements.setup({
-         defaultLocale: "en-US",
-         defaultMessages: {
-             "some.otherKey": "Great! {price, number, USD}",
-             "some.placeholder": "Placeholder text...",
-         },
-         //includeLangSettings,
-         supportedLocales: {
-             "en": "en-US",
-             "en-US": "en-US",
-             "es": "es-ES",
-             "es-ES": "es-ES",
-         },
-         locale: "es-ES",
-         loadTranslation: locale => Promise.resolve(
-             {
-                 "some.otherKey": "Que rico! {price, number, USD}",
-                 "some.placeholder": "No se como se llama esto...",
-             }
-             //JSON.parse(
-             //    document.querySelector(`[data-intl-locale="${locale}"]`).innerText
-             //)
-         ),
-         //setDocumentLang,
-     });
-
-    </script>
 </head>
 <body>
-    <intl-element intl='{ "select": "input.other-class", "key": "some.otherKey", "values": { "price": 3.14159 }, "attribute": "placeholder" }'>
-        <input class="some-class" type="text" placeholder="omg" />
-        <input class="other-class" type="text" />
-        <input class="other-class" type="text" />
-    </intl-element>
+    <intl-context
+        default-locale=""
+        default-messages=""
+        include-lang-settings=""
+        supported-locales=""
+        locale=""
+        load-translation=""
+        set-document-lang=""
+    >
+        <intl-element intl='{ "select": "input.other-class", "key": "some.otherKey", "values": { "price": 3.14159 }, "attribute": "placeholder" }'>
+            <input class="some-class" type="text" placeholder="omg" />
+            <input class="other-class" type="text" />
+            <input class="other-class" type="text" />
+        </intl-element>
 
-    <intl-element intl='{ "key": "some.otherKey", "values": { "price": 3.14159 } }'></intl-element>
+        <intl-element intl='{ "key": "some.otherKey", "values": { "price": 3.14159 } }'></intl-element>
+    </intl-context>
+
     <script src="./dist/app.js"></script>
     <script>
 
-    var app = Elm.Main.init({
-    });
+    //var app = Elm.Main.init({
+    //});
 
     //app.ports.changeLocale.subscribe(value => {
     //    IntlElements.changeLocale(value);

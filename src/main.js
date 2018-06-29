@@ -1,7 +1,9 @@
 import IntlMessageFormat from "intl-messageformat/src/main";
 
+import { CHANGE_LOCALE } from "./cmds";
 import { configureCore } from "./core";
-import { define as defineElement } from "./elements/element";
+import { define as defineContext } from "./intl/context";
+import { define as defineElement } from "./intl/element";
 
 const setDocumentLang = lang => {
     document.querySelector("html").setAttribute("lang", lang);
@@ -21,11 +23,6 @@ const includeLangSettings = lang => {
     document.querySelector("head").appendChild(localeInclude);
 };
 
-const IntlElements = configureCore({
-    includeLangSettings,
-    setDocumentLang,
-});
-
 const registerElement = (tag, Element, options) => (
     window.customElements.define(tag, Element, options)
 );
@@ -33,7 +30,26 @@ const registerElement = (tag, Element, options) => (
 // FIXME: `nextTick` shouldn't be necessary, remove it!
 const nextTick = fn => window.setTimeout(fn, 1);
 
-defineElement(IntlElements, registerElement, nextTick);
+const intlFactory = configureCore({
+    includeLangSettings,
+    setDocumentLang,
+});
+
+defineContext(registerElement, nextTick, intlFactory);
+defineElement(registerElement, nextTick);
+
+const IntlElements = {
+    cmds: {
+        CHANGE_LOCALE,
+    },
+    changeLocale: locale => (
+        document.dispatchEvent(new CustomEvent(CHANGE_LOCALE, {
+            detail: {
+                locale,
+            },
+        }))
+    ),
+};
 
 // We need to expose the constructor for dynamic locale data loading
 window["IntlMessageFormat"] = IntlMessageFormat;
