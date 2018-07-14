@@ -21,6 +21,11 @@ export const configureElement = nextTick => class extends HTMLElement {
     }
 
     attributeChangedCallback(name, oldValue, value) {
+        // FIXME: Do we actually need this master attribute or can we get by using
+        //        `key`, `values` and `attribute` by themselves?
+        //        Right now a collection of configs is supported to enable
+        //        configuring multiple things at once, is this really necessary or
+        //        does that try to solve too much?
         switch (name) {
         case "intl":
             if (this._fingerprint !== value) {

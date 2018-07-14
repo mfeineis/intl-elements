@@ -9,6 +9,7 @@ export const configureContext = (nextTick, intlFactory) => class extends HTMLEle
     }
 
     connectedCallback() {
+        // FIXME: How do we configure these with the <intl-context> markup?
         this._intl = intlFactory({
             defaultLocale: "en-US",
             defaultMessages: {
@@ -22,7 +23,6 @@ export const configureContext = (nextTick, intlFactory) => class extends HTMLEle
                 "es": "es-ES",
                 "es-ES": "es-ES",
             },
-            locale: "es-ES",
             loadTranslation: locale => Promise.resolve(
                 {
                     "some.otherKey": "Que rico! {price, number, USD}",
@@ -32,6 +32,7 @@ export const configureContext = (nextTick, intlFactory) => class extends HTMLEle
                 //    document.querySelector(`[data-intl-locale="${locale}"]`).innerText
                 //)
             ),
+            locale: "es-ES",
             //setDocumentLang,
         });
 
