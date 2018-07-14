@@ -44,7 +44,7 @@ export const configureElement = nextTick => class extends HTMLElement {
     }
 
     connectedCallback() {
-        console.log("<intl-element>.connectedCallback", this.children);
+        //console.log("<intl-element>.connectedCallback", this.children);
 
         const intl = findIntl(this);
 
