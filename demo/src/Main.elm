@@ -2,9 +2,8 @@ module Main exposing (main)
 
 import Browser
 import Html exposing (Html)
-import Html.Attributes as Attr
 import Intl
-import Json.Decode as Decode exposing (Value)
+import Json.Decode exposing (Value)
 import Translation exposing (LangKey(..), t)
 
 
