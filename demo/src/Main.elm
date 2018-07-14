@@ -3,9 +3,9 @@ module Main exposing (main)
 import Browser
 import Html exposing (Html)
 import Html.Attributes as Attr
-import Translation exposing (LangKey(..), t)
 import Intl
 import Json.Decode as Decode exposing (Value)
+import Translation exposing (LangKey(..), t)
 
 
 main : Program Value Model Msg

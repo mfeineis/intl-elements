@@ -3,11 +3,11 @@ module Translation exposing (LangKey(..), t)
 import Intl exposing (Spec)
 import Json.Encode as Encode
 
+
 type LangKey
     = SomeButton
     | SomeOtherKey Float
     | SomePlaceholder
-
 
 
 
@@ -58,4 +58,3 @@ t key =
 
         SomePlaceholder ->
             Intl.spec "some.placeholder"
-
