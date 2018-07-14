@@ -27,9 +27,19 @@ type Msg
     = Noop
 
 
-translated : { ctx | somePrice : Float } -> List (Html.Attribute msg) -> Html msg
-translated { somePrice } =
-    Intl.element "some.otherKey"
+type LangKey
+    = SomeButton
+    | SomeOtherKey Float
+    | SomePlaceholder
+
+
+
+-- FIXME: The formats should really be strongly typed!
+
+
+attachDollarFormat : Intl.Spec -> Intl.Spec
+attachDollarFormat =
+    Intl.mapFormats
         (Encode.object
             [ ( "number"
               , Encode.object
@@ -43,17 +53,48 @@ translated { somePrice } =
               )
             ]
         )
+
+
+attachPrice : Float -> Intl.Spec -> Intl.Spec
+attachPrice price =
+    -- FIXME: We get runtime errors when the values don't fit or
+    --        if they are omitted :-/
+    Intl.mapValues
         (Encode.object
-            [ ( "price", Encode.float somePrice )
+            [ ( "price", Encode.float price )
             ]
         )
 
 
+t : LangKey -> Intl.Spec
+t key =
+    case key of
+        SomeButton ->
+            Intl.spec "some.otherKey"
+                |> attachPrice 0.02
+                |> attachDollarFormat
+
+        SomeOtherKey price ->
+            Intl.spec "some.otherKey"
+                |> attachPrice price
+                |> attachDollarFormat
+
+        SomePlaceholder ->
+            Intl.spec "some.placeholder"
+
+
+showPrice : { ctx | somePrice : Float } -> Html msg -> Html msg
+showPrice { somePrice } =
+    Intl.element
+        [ t (SomeOtherKey somePrice)
+        , Intl.mapAttribute "title" (t (SomeOtherKey somePrice))
+        ]
+
+
 someInput : List (Html.Attribute msg) -> Html msg
 someInput attrs =
-    Intl.withPlaceholder "some.placeholder"
-        (Encode.object [])
-        (Encode.object [])
+    Intl.element
+        [ Intl.mapAttribute "placeholder" (t SomePlaceholder) ]
         (Html.input attrs [])
 
 
@@ -62,10 +103,21 @@ view model =
     { title = "Hello World - Elm19"
     , body =
         [ Html.text "Hello World!"
-        , translated model []
-        , someInput []
-        , Intl.withPlaceholder "some.unknownKey" (Encode.object []) (Encode.object []) (Html.input [] [])
-        , Intl.withPlaceholder "some.placeholder" (Encode.object []) (Encode.object [])
-            (Html.textarea [] [])
+        , Intl.context
+            [ showPrice model (Html.text "")
+            , someInput []
+            , Intl.text (t SomePlaceholder)
+            , Intl.element
+                [ Intl.mapAttribute "placeholder"
+                    (Intl.spec "some.unknownKey")
+                ]
+                (Html.input [] [])
+            , Intl.element
+                [ Intl.mapAttribute "placeholder" (t SomePlaceholder) ]
+                (Html.textarea [] [])
+            , Html.button []
+                [ Intl.text (t SomeButton)
+                ]
+            ]
         ]
     }
