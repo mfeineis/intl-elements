@@ -52,7 +52,7 @@ const IntlElements = {
         CHANGE_LOCALE,
     },
     defineContext: config => {
-        const key = `INTLCTX${String(Math.random()).replace(/\D/g, '')}`;
+        const key = config.key || `INTLCTX${String(Math.random()).replace(/\D/g, '')}`;
         // FIXME: Validate duplicated context definitions?
         contextLookup[key] = config;
         return key;
