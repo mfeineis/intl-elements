@@ -57,7 +57,7 @@ export const render = it => {
         return;
     }
 
-    console.log("render", it, intl);
+    //console.log("render", it, intl);
 
     try {
         const cfgs = extractConfig(it, intl);

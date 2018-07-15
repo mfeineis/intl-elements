@@ -44,11 +44,15 @@ defineContext(registerElement, nextTick, key => {
 defineElement(registerElement, nextTick);
 
 const IntlElements = {
+    // FIXME: Remove internals in PROD
+    get __contexts__() {
+        return contextLookup;
+    },
     cmds: {
         CHANGE_LOCALE,
     },
     defineContext: config => {
-        const key = `INTL|${String(Math.random()).replace(/\D/g, '')}`;
+        const key = `INTLCTX${String(Math.random()).replace(/\D/g, '')}`;
         // FIXME: Validate duplicated context definitions?
         contextLookup[key] = config;
         return key;
