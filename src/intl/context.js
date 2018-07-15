@@ -9,32 +9,7 @@ export const configureContext = (nextTick, intlFactory) => class extends HTMLEle
     }
 
     connectedCallback() {
-        // FIXME: How do we configure these with the <intl-context> markup?
-        this._intl = intlFactory({
-            defaultLocale: "en-US",
-            defaultMessages: {
-                "some.otherKey": "Great! {price, number, USD}",
-                "some.placeholder": "Placeholder text...",
-            },
-            //includeLangSettings,
-            supportedLocales: {
-                "en": "en-US",
-                "en-US": "en-US",
-                "es": "es-ES",
-                "es-ES": "es-ES",
-            },
-            loadTranslation: locale => Promise.resolve(
-                {
-                    "some.otherKey": "Que rico! {price, number, USD}",
-                    "some.placeholder": "No se como se llama esto...",
-                }
-                //JSON.parse(
-                //    document.querySelector(`[data-intl-locale="${locale}"]`).innerText
-                //)
-            ),
-            locale: "es-ES",
-            //setDocumentLang,
-        });
+        this._intl = intlFactory(this.getAttribute("context-key"));
 
         this._onChangeLocale = ({ detail = {} }) => {
             this._intl.changeLocale(detail.locale);

@@ -1,7 +1,9 @@
 module Intl
     exposing
-        ( Spec
+        ( ContextKey
+        , Spec
         , context
+        , decodeContextKey
         , element
         , mapAttribute
         , mapFormats
@@ -12,9 +14,10 @@ module Intl
 
 import Html exposing (Html)
 import Html.Attributes as Attr
-import Json.Decode as Decode exposing (Value)
+import Json.Decode as Decode exposing (Decoder, Value)
 import Json.Encode as Encode
 
+type ContextKey = ContextKey String
 
 type Spec
     = Spec
@@ -25,9 +28,16 @@ type Spec
         }
 
 
-context : List (Html msg) -> Html msg
-context =
-    Html.node "intl-context" []
+decodeContextKey : Decoder ContextKey
+decodeContextKey =
+    Decode.map ContextKey Decode.string
+
+
+context : ContextKey -> List (Html msg) -> Html msg
+context (ContextKey key) =
+    Html.node "intl-context"
+        [ Attr.attribute "context-key" key
+        ]
 
 
 element : List Spec -> Html msg -> Html msg
@@ -87,3 +97,4 @@ spec key =
 text : Spec -> Html msg
 text s =
     element [ s ] (Html.text "")
+

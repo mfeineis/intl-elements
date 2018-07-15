@@ -35,12 +35,23 @@ const intlFactory = configureCore({
     setDocumentLang,
 });
 
-defineContext(registerElement, nextTick, intlFactory);
+const contextLookup = {};
+
+defineContext(registerElement, nextTick, key => {
+    // FIXME: Check that the context is actually there!
+    return intlFactory(contextLookup[key]);
+});
 defineElement(registerElement, nextTick);
 
 const IntlElements = {
     cmds: {
         CHANGE_LOCALE,
+    },
+    defineContext: config => {
+        const key = `INTL|${String(Math.random()).replace(/\D/g, '')}`;
+        // FIXME: Validate duplicated context definitions?
+        contextLookup[key] = config;
+        return key;
     },
     changeLocale: locale => (
         document.dispatchEvent(new CustomEvent(CHANGE_LOCALE, {

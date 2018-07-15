@@ -48,6 +48,11 @@ export const configureElement = nextTick => class extends HTMLElement {
 
         const intl = findIntl(this);
 
+        if (!intl) {
+            // FIXME: We should probably fall back gracefully without an <intl-context>
+            throw new Error(`FATAL: No <intl-context> could be found up in the tree.`);
+        }
+
         // FIXME: Maybe having the `MutationObserver` is overkill?
         this._observer = new MutationObserver(list => {
             //console.log("> mutations on ", this, ":", list);

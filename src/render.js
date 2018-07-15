@@ -14,7 +14,7 @@ export const findContext = it => {
     while (node.parentNode) {
         node = node.parentNode;
 
-        if (node.tagName.toLowerCase() === "intl-context") {
+        if (node.tagName && node.tagName.toLowerCase() === "intl-context") {
             return node;
         }
     }
