@@ -4,6 +4,7 @@ module Intl
         , Spec
         , context
         , decodeContextKey
+        , defaultContextKey
         , element
         , mapAttribute
         , mapFormats
@@ -17,7 +18,10 @@ import Html.Attributes as Attr
 import Json.Decode as Decode exposing (Decoder, Value)
 import Json.Encode as Encode
 
-type ContextKey = ContextKey String
+
+type ContextKey
+    = ContextKey String
+
 
 type Spec
     = Spec
@@ -31,6 +35,11 @@ type Spec
 decodeContextKey : Decoder ContextKey
 decodeContextKey =
     Decode.map ContextKey Decode.string
+
+
+defaultContextKey : ContextKey
+defaultContextKey =
+    ContextKey "INVALID_CONTEXT_KEY"
 
 
 context : ContextKey -> List (Html msg) -> Html msg
@@ -97,4 +106,3 @@ spec key =
 text : Spec -> Html msg
 text s =
     element [ s ] (Html.text "")
-
